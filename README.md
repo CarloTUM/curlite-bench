@@ -46,6 +46,17 @@ cheapest of them on HTTPS because it lets OpenSSL look CA certificates up by
 hash instead of parsing the bundle. rustls with compiled-in roots is cheaper
 on x86. Results on a small ARM board with the distro libcurl follow.
 
+### Where the per-request time goes
+
+callgrind on the curlite client against the distro libcurl, 3000 requests on
+one keep-alive connection (2026-10-11): about 94 000 instructions per
+request, of which three quarters are inside libcurl itself (easy handle
+reset, the twenty setopts, URL parsing, connection cache lookup and the
+proxy environment check, which calls `getenv` several times per request).
+malloc and free take another 13 %. curlite's own code is below 5 %. The gap
+to ureq (22 against 15 µs on this laptop) is libcurl's per-request setup,
+not something the wrapper can remove.
+
 ## Results on a small ARM board
 
 Orange Pi Zero 2W (Allwinner H618, 4x Cortex-A53 at 1.4 GHz, 4 GB), Armbian
