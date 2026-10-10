@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = ["server", "measure", "clients/*"]
+
+# identical release profile for every client: what a CLI author would ship.
+# opt-level 3 rather than "z" because the profile also compiles libcurl when
+# curl-sys has to build it from source
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+# curl-rust with a `rustls-ring` feature (rustls-ffi on ring instead of
+# aws-lc: no cmake, no CPU jitter entropy seeding); proposed upstream
+[patch.crates-io]
+curl-sys = { path = "vendor/curl-sys" }
+curl = { path = "vendor/curl" }

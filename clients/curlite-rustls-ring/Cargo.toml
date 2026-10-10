@@ -1,0 +1,12 @@
+[package]
+name = "fetch-curlite-rustls-ring"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+# libcurl built from source with rustls on ring: no OpenSSL, no aws-lc, no
+# cmake. The feature lives in the patched curl crates under vendor/ until it
+# is upstream, so it is enabled on curl directly rather than through curlite.
+curlite = { path = "../../../curlite", default-features = false }
+curl = { version = "0.4", default-features = false, features = ["rustls-ring", "static-curl"] }
