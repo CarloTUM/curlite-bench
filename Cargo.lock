@@ -203,6 +203,7 @@ checksum = "a31eee39dddec8330830986fcd7625edb5a24ec90ea038215273bbc3adb08ac6"
 [[package]]
 name = "curl"
 version = "0.4.51"
+source = "git+https://github.com/CarloTUM/curl-rust?rev=0cd5132b848295cdbfd7fd0fbfc04ec2472e67a5#0cd5132b848295cdbfd7fd0fbfc04ec2472e67a5"
 dependencies = [
  "curl-sys",
  "libc",
@@ -216,6 +217,7 @@ dependencies = [
 [[package]]
 name = "curl-sys"
 version = "0.4.91+curl-8.22.0"
+source = "git+https://github.com/CarloTUM/curl-rust?rev=0cd5132b848295cdbfd7fd0fbfc04ec2472e67a5#0cd5132b848295cdbfd7fd0fbfc04ec2472e67a5"
 dependencies = [
  "cc",
  "libc",
@@ -1403,7 +1405,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2061,7 +2063,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
