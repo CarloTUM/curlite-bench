@@ -21,30 +21,37 @@ blocking (rustls and native-tls), isahc. Add one by copying a directory under
 
 ## Results
 
-x86_64 laptop, Linux, 12 CPUs, 2026-10-10. curlite here links a libcurl that
-`curl-sys` built from source (no `libcurl4-openssl-dev` on this machine) against
-the system OpenSSL 3; on a machine with the distro libcurl the binary carries no
-HTTP or TLS code at all. `runs=20`, 300 in-process requests, HTTPS against
-example.com (CPU time, so network latency is excluded). minreq and attohttpc
-open a new connection per request, hence their per-request cost.
+x86_64 laptop, Linux, 12 CPUs, 2026-10-11. `runs=20`, 300 in-process
+requests, HTTPS against example.com (CPU time, so network latency is
+excluded). minreq and attohttpc open a new connection per request, hence
+their per-request cost. `curlite` is the default build on the distro libcurl
+(Ubuntu's 8.5 with OpenSSL 3 and its 30-odd shared libraries); the other
+`curlite-*` rows are the static builds from the curlite README, `curlite-ring-min`
+the `minimal` HTTP(S)-only libcurl on ring.
 
 | client | binary KiB | crates | cold start ms | max RSS KiB | per request µs | 8 MiB download RSS KiB | HTTPS CPU ms | HTTPS RSS KiB |
 |---|---|---|---|---|---|---|---|---|
-| minreq | 1318 | 11 | 3.8 | 2304 | 1659 | 10232 | 9 | 3428 |
-| ureq-rustls | 1876 | 22 | 4.0 | 2680 | 24 | 11032 | 10 | 4192 |
-| attohttpc | 4033 | 48 | 4.0 | 3388 | 1305 | 11052 | 35 | 5034 |
-| reqwest-rustls | 2495 | 85 | 4.6 | 3534 | 34 | 11868 | 12 | 4346 |
-| ureq-native | 827 | 30 | 4.7 | 4162 | 36 | 12444 | 49 | 10516 |
-| curlite | 1096 | 20 | 6.3 | 6334 | 33 | 14436 | 21 | 8296 |
-| isahc | 1485 | 73 | 7.0 | 6764 | 51 | 14768 | 33 | 9374 |
-| reqwest-native | 1238 | 85 | 31.0 | 9196 | 40 | 17668 | 43 | 9656 |
+| minreq | 1318 | 11 | 3.9 | 2194 | 1674 | 10156 | 10 | 3396 |
+| attohttpc | 4033 | 48 | 4 | 2800 | 1177 | 10920 | 33 | 4798 |
+| ureq-rustls | 1876 | 22 | 4 | 2650 | 24 | 10904 | 10 | 4164 |
+| curlite-rustls-ring | 2363 | 36 | 4.1 | 3056 | 30 | 11220 | 14 | 4444 |
+| curlite-ring-min | 2247 | 36 | 4.2 | 3044 | 37 | 11100 | 14 | 4342 |
+| ureq-native | 827 | 30 | 4.3 | 4214 | 42 | 12436 | 47 | 10486 |
+| curlite-rustls | 4406 | 35 | 4.4 | 3710 | 19 | 11364 | 33 | 5844 |
+| reqwest-rustls | 2495 | 85 | 4.7 | 3310 | 49 | 11712 | 12 | 4364 |
+| curlite-static-ssl | 6657 | 20 | 5.5 | 6034 | 24 | 14212 | 20 | 8400 |
+| curlite-static | 1106 | 20 | 6 | 6352 | 48 | 14312 | 21 | 8340 |
+| curlite | 431 | 20 | 8.4 | 10548 | 30 | 18164 | 23 | 12926 |
+| isahc | 810 | 73 | 9.3 | 11346 | 50 | 19384 | 36 | 14060 |
+| reqwest-native | 1238 | 85 | 33.3 | 9112 | 30 | 17716 | 42 | 9678 |
 
-What the numbers say so far: the TLS library decides, not the HTTP client.
-Every OpenSSL-based client (curlite, isahc, ureq-native, reqwest-native) pays
-for loading libssl/libcrypto and OpenSSL 3's initialisation; curlite is the
-cheapest of them on HTTPS because it lets OpenSSL look CA certificates up by
-hash instead of parsing the bundle. rustls with compiled-in roots is cheaper
-on x86. Results on a small ARM board with the distro libcurl follow.
+What the numbers say: the TLS library and the linking decide, not the HTTP
+client. The distro libcurl costs 8 ms and 10 MiB before the first byte, a
+static libcurl on rustls with ring is at ureq's 4 ms and within 0.4 MiB of
+it. Every OpenSSL-based client pays for OpenSSL 3's initialisation; among
+those, curlite is the cheapest on HTTPS because it lets OpenSSL look CA
+certificates up by hash instead of parsing the bundle. On x86 the `minimal`
+libcurl buys nothing over the plain ring build.
 
 ### Where the per-request time goes
 
